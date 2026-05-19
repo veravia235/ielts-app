@@ -1,0 +1,11 @@
+streamlit
+openai
+gTTS
+SpeechRecognition
+pypdf
+docx2txt
+langchain
+langchain-community
+langchain-openai
+faiss-cpu
+sentence-transformers
