@@ -57,21 +57,17 @@ with tab2:
         if st.button("开始解析我的生词"):
             with st.spinner("正在解析文件并生成精讲..."):
                 try:
-                    # 读取文本内容
-                    # 提取文件字节
-file_bytes = uploaded_file.getvalue()
-try:
-    # 优先使用 utf-8-sig，它能自动过滤掉 Windows 的隐形 BOM 头 (0xef)
-    text_content = file_bytes.decode("utf-8-sig")
-except UnicodeDecodeError:
-    try:
-        # 如果还报错，说明可能是国内 Windows 默认的 GBK 编码，尝试用 GBK 解码
-        text_content = file_bytes.decode("gbk", errors="ignore")
-    except Exception as e:
-        st.error(f"无法识别文件编码，请确保文件是 TXT 格式。错误详情：{e}")
-        st.stop()
+                    # 提取文件字节并处理各种疑难杂症编码
+                    file_bytes = uploaded_file.getvalue()
+                    try:
+                        text_content = file_bytes.decode("utf-8-sig")
+                    except UnicodeDecodeError:
+                        text_content = file_bytes.decode("gbk", errors="ignore")
+                    
+                    # 组合提示词
                     prompt = f"以下是学生导入的生词列表，请作为雅思老师，为这些单词提供精准的中文翻译、音标和一个雅思相关的英文例句：\n\n{text_content}"
                     
+                    # 调用模型生成解析
                     response = client.chat.completions.create(
                         model="deepseek-chat",
                         messages=[{"role": "system", "content": "你是专业的雅思词汇助手。"}, {"role": "user", "content": prompt}]
@@ -81,8 +77,6 @@ except UnicodeDecodeError:
                     st.success("解析完成！请在下方查看。")
                 except Exception as e:
                     st.error(f"文件解析失败: {e}")
-
-st.markdown("---")
 
 # --- 显示历史记录 ---
 if st.session_state.vocab_log:
